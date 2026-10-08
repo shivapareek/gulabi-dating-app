@@ -27,16 +27,20 @@ ThemeData buildTheme(Brightness b) {
     primary: Brand.pink,
     surface: dark ? const Color(0xFF141018) : Colors.white,
   );
-  final base = ThemeData(useMaterial3: true, colorScheme: scheme);
+  final base = ThemeData(
+    useMaterial3: true,
+    colorScheme: scheme,
+    fontFamily: GoogleFonts.poppins().fontFamily,
+  );
   return base.copyWith(
     scaffoldBackgroundColor:
         dark ? const Color(0xFF0E0B11) : const Color(0xFFFFF8FA),
-    textTheme: GoogleFonts.poppinsTextTheme(base.textTheme),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: false,
-      titleTextStyle: GoogleFonts.poppins(
+      titleTextStyle: TextStyle(
+        fontFamily: GoogleFonts.poppins().fontFamily,
         fontSize: 22,
         fontWeight: FontWeight.w700,
         color: dark ? Colors.white : const Color(0xFF1D1220),
@@ -54,9 +58,5 @@ ThemeData buildTheme(Brightness b) {
     chipTheme: base.chipTheme.copyWith(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
     ),
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-    }),
   );
 }

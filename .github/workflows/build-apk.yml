@@ -27,7 +27,7 @@ jobs:
       - name: Generate Android project
         run: |
           flutter create . --platforms android --org com.jaipur --project-name dating
-          rm -rf test
+          rm -rf test analysis_options.yaml
           # App name, internet permission
           sed -i 's/android:label="dating"/android:label="Gulabi"/' android/app/src/main/AndroidManifest.xml
           sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' android/app/src/main/AndroidManifest.xml

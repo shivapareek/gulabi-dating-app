@@ -73,15 +73,20 @@ jobs:
 
       - name: Get packages and icons
         run: |
-          flutter pub get
-          dart run flutter_launcher_icons
+          mkdir -p ci-logs
+          set -o pipefail
+          flutter pub get 2>&1 | tee ci-logs/pub.txt
+          dart run flutter_launcher_icons 2>&1 | tee ci-logs/icons.txt
 
       - name: Analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: |
+          set -o pipefail
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee ci-logs/analyze.txt
 
       - name: Build release APK
         run: |
-          flutter build apk --release $DEFINES
+          set -o pipefail
+          flutter build apk --release $DEFINES 2>&1 | tee ci-logs/build.txt
           cp build/app/outputs/flutter-apk/app-release.apk Gulabi-$MODE.apk
 
       - uses: actions/upload-artifact@v4
@@ -97,3 +102,16 @@ jobs:
           gh release create "$TAG" "Gulabi-$MODE.apk" \
             --title "Gulabi build ${{ github.run_number }} ($MODE)" \
             --notes "Android APK. Mode: $MODE. Commit ${{ github.sha }}" --latest
+
+      - name: Save logs on failure
+        if: failure()
+        run: |
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          mkdir -p /tmp/logs && cp -r ci-logs/. /tmp/logs/ 2>/dev/null || true
+          git checkout --orphan ci-logs
+          git rm -rf -q . || true
+          cp -r /tmp/logs/. .
+          git add -A
+          git commit -q -m "logs ${{ github.run_number }}"
+          git push -f origin ci-logs

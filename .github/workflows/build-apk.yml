@@ -35,6 +35,13 @@ jobs:
           G=$(ls android/app/build.gradle* | head -1)
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/; s/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/' "$G"
           grep -n "minSdk" "$G"
+          # Sign every build with the fixed key from signing/ (stable SHA-1)
+          if [[ "$G" == *.kts ]]; then
+            printf '\nandroid {\n    signingConfigs {\n        getByName("debug") {\n            storeFile = rootProject.file("../signing/gulabi.keystore")\n            storePassword = "android"\n            keyAlias = "androiddebugkey"\n            keyPassword = "android"\n        }\n    }\n}\n' >> "$G"
+          else
+            printf '\nandroid {\n    signingConfigs {\n        debug {\n            storeFile rootProject.file("../signing/gulabi.keystore")\n            storePassword "android"\n            keyAlias "androiddebugkey"\n            keyPassword "android"\n        }\n    }\n}\n' >> "$G"
+          fi
+          tail -12 "$G"
 
       - name: Install fixed signing key
         env:

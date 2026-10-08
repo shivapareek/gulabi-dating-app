@@ -105,13 +105,14 @@ jobs:
 
       - name: Save logs on failure
         if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          mkdir -p /tmp/logrepo && cp -r ci-logs/. /tmp/logrepo/ 2>/dev/null || true
+          cd /tmp/logrepo
+          git init -q -b ci-logs
           git config user.name "ci"
           git config user.email "ci@users.noreply.github.com"
-          mkdir -p /tmp/logs && cp -r ci-logs/. /tmp/logs/ 2>/dev/null || true
-          git checkout --orphan ci-logs
-          git rm -rf -q . || true
-          cp -r /tmp/logs/. .
           git add -A
-          git commit -q -m "logs ${{ github.run_number }}"
-          git push -f origin ci-logs
+          git commit -q -m "logs ${{ github.run_number }}" --allow-empty
+          git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}" ci-logs
